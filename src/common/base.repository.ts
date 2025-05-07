@@ -16,8 +16,12 @@ export abstract class BaseRepository<T> {
         return this.model.findOne(filter).exec();
     }
 
-    async findAll(filter: FilterQuery<T> = {}): Promise<T[]> {
-        return this.model.find(filter).exec();
+    async findAll(filter: FilterQuery<T> = {}): Promise<any[]> {
+        const results = await this.model.find(filter).lean<T & { _id: any; }[]>().exec();
+        return results.map((doc) => ({
+            ...doc,
+            id: doc._id.toString(),
+        }));
     }
 
     async update(id: string, update: UpdateQuery<T>): Promise<T | null> {

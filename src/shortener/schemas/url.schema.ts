@@ -4,17 +4,32 @@ import { HydratedDocument } from "mongoose";
 export type UrlDocument = HydratedDocument<Url>;
 
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 export class Url {
     @Prop({ required: true })
-    url: string;
+    destinationUrl: string;
 
-    @Prop({ index: true, required: true })
-    aliasOrShortenedUrl: string;
+    @Prop({ index: true })
+    aliasOrCode: string;
 
     @Prop({ default: 0 })
-    clicks: number;
+    totalClicks: number;
+
+    @Prop({ default: 0 })
+    uniqueVisitors: number;
+
+    @Prop({ required: false })
+    lastClickedAt: Date;
+
+    @Prop({ index: true })
+    ownerId: string;
 }
 
 
-export const UrlSchema = SchemaFactory.createForClass(Url);
+const UrlSchema = SchemaFactory.createForClass(Url);
+
+UrlSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+export { UrlSchema };
